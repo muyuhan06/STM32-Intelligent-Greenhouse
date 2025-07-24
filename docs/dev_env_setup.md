@@ -1,6 +1,31 @@
 # env_setup 项目环境配置
 
-## Keil MDK-Community 完整配置指南
+---
+
+### **一、文档核心内容**
+针对 **STM32F103C8T6 开发**（智能温室项目）的完整开发环境搭建记录。核心聚焦于 **Keil MDK-Community 社区版** 和 **STM32CubeMX** 两大工具的标准化配置流程。
+
+1. **Keil MDK 配置 部分**
+
+详细说明了从 ARM 非商业账号注册、下载安装包（如 `MDK542A.EXE`）、安装路径规范（禁用中文/空格）、社区版激活（通过 `License Management` 登录 ARM 账号获取长期许可），到关键设备支持包（如 `Keil::STM32F1xx_DFP`）的安装方法。同时强调环境验证步骤：新建工程需包含 **CMSIS Core** 和 **Startup 文件**，且编译前需预建 `main.c` 文件以避免编译失败。
+
+2. **STM32CubeMX 配置 部分**
+
+依赖 Keil 环境，重点突出 **STM32F1 Series 支持包** 的强制性安装——该包提供 HAL 库驱动、引脚定义及时钟树配置模板，缺失将导致代码生成失败。安装流程涵盖 ST 账号注册、安装包管理员权限运行，以及支持包的图形化安装步骤。
+
+3. **收录了典型问题的速解方案**
+
+如头文件缺失需检查设备包安装状态，权限不足需切换管理员身份运行安装包，激活失败需关闭杀毒软件重试等。此外，扩展资源部分整合了 **STM32CubeMX 用户手册**（图形化配置指南）、**RM0008 参考手册**（外设与寄存器详解）及 **STM32F103C8T6 数据手册**（硬件参数与电气特性），为深度开发提供技术支撑。
+
+### **二、文档核心用途**
+旨在作为**项目实践记录**，以便俺学而有痕，梳理学习过程，实现以下目标：
+1. **标准化流程支撑**：通过 Keil MDK + STM32CubeMX 双工具链的整合配置，确保快速搭建支持基础功能（如 LED 控制、传感器采集）的验证环境；
+2. **开发风险规避**：针对安装路径规范、激活失效、支持包依赖等高频故障点提供预判性解决方案，降低环境配置阶段的试错成本；
+3. **软硬件协同准备**：明确 ST-Link 调试器与传感器（如 DHT11）的硬件关联性，为后续实物开发铺平道路。
+
+---
+
+## Keil MDK-Community 完整配置记录
 
 **适用场景**：【智能温室项目】的STM32 Cortex-M 单片机开发（学生/创客/非商业用途）
 **文档目标**：通过 **step-by-step 流程+关键截图**，完成从“**下载安装**”到“**环境验证**”的全流程配置
@@ -41,16 +66,16 @@
   ![安装版本](https://raw.githubusercontent.com/muyuhan06/image-repo/main/安装版本.png)
 
 
-#### **2. 安装 **
+#### 2. 安装 
 **操作步骤**：
 
-- 双击下载的 `MDK542A.EXE`，勾选**“I agree to the terms…”**（同意许可）；
+- 双击下载的 `MDK542A.EXE`，勾选“**I agree to the terms…**”（同意许可）；
 - 选择安装路径（默认路径）；
 
 ![安装路径](https://raw.githubusercontent.com/muyuhan06/image-repo/main/安装路径.png)
 
 - 填写用户信息（建议与前面一致）；
-- 点击**“Install”**，等待安装完成（约 2 分钟），点击**“Finish”**。
+- 点击“**Install**”，等待安装完成（约 2 分钟），点击“**Finish**”。
 
 
 #### **3. 激活**
@@ -58,12 +83,12 @@
 
 - 打开桌面快捷方式 `Keil uVision5`；
 - 点击菜单栏 **File → License Management**（文件→许可证管理）；
-- 切换到**“User-Based License”** 标签页，点击**“Activate / Deactivate…”**（激活/注销）；
-- 自动打开**Arm License Management Utility 1.3.5**，保持**“License Server”** 选中，服务器地址填 `https://mdk-preview.keil.arm.com`；
+- 切换到“**User-Based License**” 标签页，点击“**Activate / Deactivate…**”（激活/注销）；
+- 自动打开**Arm License Management Utility 1.3.5**，保持“**License Server**” 选中，服务器地址填 `https://mdk-preview.keil.arm.com`；
 
 ![激活码按官网教程](https://raw.githubusercontent.com/muyuhan06/image-repo/main/激活码按官网教程.png)
 
-- 点击**“Query”**，（可能需要登录 ARM 账号输入注册邮箱和密码）；
+- 点击“**Query**”，（可能需要登录 ARM 账号输入注册邮箱和密码）；
 - 验证成功后，工具会显示**激活状态**（产品名称、有效期、缓存时间）。
 
 ![使用期限](https://raw.githubusercontent.com/muyuhan06/image-repo/main/使用期限.png)
@@ -72,15 +97,15 @@
 #### **4. 安装 STM32 设备支持包**
 **操作步骤**：
 
-- 在`Keil uVision5`中，点击工具栏**“Pack Installer”**（或按 `Ctrl+P`）；
+- 在`Keil uVision5`中，点击工具栏“**Pack Installer**”（或按 `Ctrl+P`）；
 
 ![PackInstaller](https://raw.githubusercontent.com/muyuhan06/image-repo/main/image-20250721222518120.png)
 
 【我是在安装时直接弹出界面，重新打开软件后使用快捷键并没有打开，在工具栏打开的】
 
-- 左侧**“Devices”** 栏展开**“STMicroelectronics → STM32F1 Series”**（选择你的芯片系列）；
+- 左侧“**Devices**” 栏展开“**STMicroelectronics → STM32F1 Series**”（选择你的芯片系列）；
 
-- 右侧**“Packs”** 栏找到**“Keil::STM32F1xx_DFP”**（对应 F1 系列），点击**“Install”**（若已安装，状态为“Up to date”）；
+- 右侧“**Packs**” 栏找到“**Keil::STM32F1xx_DFP**”（对应 F1 系列），点击“**Install**”（若已安装，状态为“**Up to date**”）；
 
 ![](https://raw.githubusercontent.com/muyuhan06/image-repo/main/插件包安装.png)
 
@@ -93,15 +118,15 @@
 **操作步骤**：
 - 点击菜单栏 **Project → New μVision Project**（新建工程）；
 - 选择保存路径（如 `C:\Projects\STM32_Test`），输入工程名（如 `STM32_Test`）；
-- 搜索并选择芯片型号（如 `STM32F103C8Tx`），点击**“OK”**；
-- 在**“Manage Run-Time Environment”** 窗口中，勾选：
+- 搜索并选择芯片型号（如 `STM32F103C8Tx`），点击“**OK**”；
+- 在“**Manage Run-Time Environment**” 窗口中，勾选：
 - **CMSIS → Core**（Cortex-M 内核支持）；
 - **Device → Startup**（芯片启动文件）；
 
 ![勾选](https://raw.githubusercontent.com/muyuhan06/image-repo/main/Manage%20Run-Time%20Environment.png)
 
-- 点击**“OK”**，生成空工程；
-- 点击工具栏**“Build”**（或按 `F7`），查看编译输出。
+- 点击“**OK**”，生成空工程；
+- 点击工具栏“**Build**”（或按 `F7`），查看编译输出。
 
 ![成功创建空项目](https://raw.githubusercontent.com/muyuhan06/image-repo/main/成功创建空项目.png)
 
@@ -125,7 +150,7 @@
 **问题2：安装时“权限不足”**
 
 - **现象**：安装向导提示“无法写入文件”；
-- **解决方案**：右键点击安装包，选择**“以管理员身份运行”**；
+- **解决方案**：右键点击安装包，选择“**以管理员身份运行**”；
 
 ![文件无法写入](https://raw.githubusercontent.com/muyuhan06/image-repo/main/问题排查—无法写入文件.png)
 
@@ -139,7 +164,7 @@
 
 遵循以上流程，即可完成 Keil MDK-Community 的完整配置，为 STM32 开发做好准备！ 🚀
 
-## STM32CubeMX 完整配置指南
+## STM32CubeMX 完整配置记录
 
 本指南旨在帮助新手快速搭建**STM32F103C8T6**开发环境，基于**STM32CubeMX+Keil MDK**实现智能温室系统的基础功能（如LED闪烁、传感器采集等）。
 
